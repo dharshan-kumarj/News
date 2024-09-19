@@ -1,17 +1,18 @@
+# main.py
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional
 import httpx
-import asyncio
 
 app = FastAPI()
 
 # CORS middleware configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://news.portos.site"],
+    allow_origins=["http://localhost", "http://localhost:8000", "http://127.0.0.1", "http://127.0.0.1:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,9 +51,9 @@ async def get_news(req: NewsRequest):
         news_api_req["sourceLocationUri"] = [f"http://en.wikipedia.org/wiki/{req.location}"]
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:  # Increased timeout to 30 seconds
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(NEWS_API_ENDPOINT, json=news_api_req)
-            response.raise_for_status()  # Raise an exception for non-200 status codes
+            response.raise_for_status()
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="Request to news API timed out")
     except httpx.HTTPStatusError as exc:
